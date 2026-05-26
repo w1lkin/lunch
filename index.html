@@ -376,7 +376,7 @@ body {
     <div class="result-content" id="result-content">
       <canvas id="particle-canvas"></canvas>
       <div class="result-emoji" id="result-emoji"></div>
-      <div class="result-text" id="result-text"></div>
+
       <div class="result-slogan" id="result-slogan"></div>
     </div>
     <div class="result-actions">
@@ -452,15 +452,22 @@ function randomPick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 // === State ===
 let options = loadOptions();
 let isRolling = false;
+
+const SLOT_REPEATS = 6;
 
 // === DOM refs ===
 const mainScreen = document.getElementById('main-screen');
 const resultScreen = document.getElementById('result-screen');
 const optionTags = document.getElementById('option-tags');
-const slotMachine = document.getElementById('slot-machine');
 const slotCols = [0, 1, 2].map(i => document.getElementById(`slot-col-${i}`));
 const stripEls = slotCols.map(col => col.querySelector('.slot-strip'));
 const rollBtn = document.getElementById('roll-btn');
@@ -469,7 +476,6 @@ const addEmoji = document.getElementById('add-emoji');
 const btnAdd = document.getElementById('btn-add');
 const headerSub = document.getElementById('header-sub');
 const resultEmoji = document.getElementById('result-emoji');
-const resultText = document.getElementById('result-text');
 const resultSlogan = document.getElementById('result-slogan');
 const resultContent = document.getElementById('result-content');
 const particleCanvas = document.getElementById('particle-canvas');
@@ -483,24 +489,24 @@ const editDone = document.getElementById('edit-done');
 function renderTags() {
   optionTags.innerHTML = options.map(o =>
     `<span class="option-tag" data-id="${o.id}">
-      <span class="tag-emoji">${o.emoji}</span>${o.name}
+      <span class="tag-emoji">${escapeHtml(o.emoji)}</span>${escapeHtml(o.name)}
       <span class="tag-del">×</span>
     </span>`
   ).join('');
 }
 
-function buildSlotStrips(targetIdx) {
-  const repeats = 6;
+function buildSlotStrips() {
   let html = '';
-  for (let r = 0; r < repeats; r++) {
+  for (let r = 0; r < SLOT_REPEATS; r++) {
     for (const o of options) {
-      html += `<div class="slot-item"><span class="emoji">${o.emoji}</span>${o.name}</div>`;
+      html += `<div class="slot-item"><span class="emoji">${escapeHtml(o.emoji)}</span>${escapeHtml(o.name)}</div>`;
     }
   }
   stripEls.forEach(el => { el.innerHTML = html; });
 }
 
 function showMain() {
+  if (particleRaf) { cancelAnimationFrame(particleRaf); particleRaf = null; }
   resultScreen.classList.remove('active');
   mainScreen.classList.remove('hidden');
   headerSub.textContent = randomPick(SUB_TITLES);
@@ -514,7 +520,6 @@ function showResult(picked) {
   resultScreen.classList.add('active');
   resultEmoji.textContent = picked.emoji;
   resultSlogan.textContent = randomPick(SLOGANS).replace('{name}', picked.name).replace('{emoji}', picked.emoji);
-  resultText.textContent = '';
   resultSlogan.style.animation = 'none';
   void resultSlogan.offsetWidth;
   resultSlogan.style.animation = 'popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both';
@@ -530,7 +535,7 @@ function roll() {
   const picked = randomPick(options);
   const targetIdx = options.indexOf(picked);
   const itemHeight = 100;
-  const totalItems = options.length * 6;
+  const totalItems = options.length * SLOT_REPEATS;
 
   const baseOffset = -(totalItems / 2) * itemHeight;
   const targetPos = baseOffset - targetIdx * itemHeight;
@@ -687,9 +692,9 @@ btnEditResult.addEventListener('click', openEdit);
 function openEdit() {
   editList.innerHTML = options.map((o, i) =>
     `<div class="edit-item">
-      <span class="edit-emoji">${o.emoji}</span>
-      <input type="text" value="${o.name}" data-id="${o.id}" data-field="name" maxlength="12">
-      <input type="text" value="${o.emoji}" data-id="${o.id}" data-field="emoji" maxlength="4" style="max-width:56px;text-align:center;">
+      <span class="edit-emoji">${escapeHtml(o.emoji)}</span>
+      <input type="text" value="${escapeHtml(o.name)}" data-id="${o.id}" data-field="name" maxlength="12">
+      <input type="text" value="${escapeHtml(o.emoji)}" data-id="${o.id}" data-field="emoji" maxlength="4" style="max-width:56px;text-align:center;">
       <span class="edit-del" data-id="${o.id}">×</span>
     </div>`
   ).join('');
@@ -710,12 +715,11 @@ editDone.addEventListener('click', () => {
       emoji: emojiInput.value.trim() || '🍽️',
     });
   });
-  if (newOptions.length >= 2) {
-    options = newOptions;
-    saveOptions(options);
-    renderTags();
-    buildSlotStrips();
-  }
+  if (newOptions.length < 2) { alert('至少需要 2 个选项哦~'); return; }
+  options = newOptions;
+  saveOptions(options);
+  renderTags();
+  buildSlotStrips();
   editOverlay.classList.remove('active');
 });
 
