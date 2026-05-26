@@ -202,7 +202,7 @@ body {
 
 /* Result screen */
 #result-screen { display: none; }
-#result-screen.active { display: flex; }
+#result-screen.active { display: flex; flex-direction: column; }
 #main-screen.hidden { display: none; }
 
 .result-content {
@@ -458,7 +458,7 @@ function escapeHtml(str) {
 let options = loadOptions();
 let isRolling = false;
 
-const SLOT_REPEATS = 6;
+const SLOT_REPEATS = 15;
 
 // === DOM refs ===
 const mainScreen = document.getElementById('main-screen');
