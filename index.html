@@ -699,6 +699,7 @@ function openEdit() {
     </div>`
   ).join('');
   editOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 editDone.addEventListener('click', () => {
@@ -721,6 +722,7 @@ editDone.addEventListener('click', () => {
   renderTags();
   buildSlotStrips();
   editOverlay.classList.remove('active');
+  document.body.style.overflow = '';
 });
 
 editList.addEventListener('click', (e) => {
@@ -734,7 +736,10 @@ editList.addEventListener('click', (e) => {
 });
 
 editOverlay.addEventListener('click', (e) => {
-  if (e.target === editOverlay) editOverlay.classList.remove('active');
+  if (e.target === editOverlay) {
+    editOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
 });
 
 // === Init ===
