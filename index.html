@@ -832,8 +832,8 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function generateShareCard() {
-  const W = 600;
-  const H = 800;
+  const W = 1200;
+  const H = 1600;
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
@@ -850,11 +850,11 @@ function generateShareCard() {
   // Decorative circles
   ctx.globalAlpha = 0.12;
   const deco = [
-    { x: 80, y: 180, r: 100, c: '#81C784' },
-    { x: 480, y: 140, r: 70, c: '#A5D6A7' },
-    { x: 520, y: 560, r: 130, c: '#FFE082' },
-    { x: 100, y: 620, r: 60, c: '#81C784' },
-    { x: 300, y: 100, r: 45, c: '#A5D6A7' },
+    { x: 160, y: 360, r: 200, c: '#81C784' },
+    { x: 960, y: 280, r: 140, c: '#A5D6A7' },
+    { x: 1040, y: 1120, r: 260, c: '#FFE082' },
+    { x: 200, y: 1240, r: 120, c: '#81C784' },
+    { x: 600, y: 200, r: 90, c: '#A5D6A7' },
   ];
   deco.forEach(d => {
     ctx.fillStyle = d.c;
@@ -867,9 +867,9 @@ function generateShareCard() {
   // White card
   ctx.fillStyle = '#FFFFFF';
   ctx.shadowColor = 'rgba(0,0,0,0.08)';
-  ctx.shadowBlur = 40;
-  ctx.shadowOffsetY = 6;
-  roundRect(ctx, 45, 120, W - 90, H - 300, 28);
+  ctx.shadowBlur = 80;
+  ctx.shadowOffsetY = 12;
+  roundRect(ctx, 90, 240, W - 180, H - 600, 56);
   ctx.fill();
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
@@ -877,54 +877,54 @@ function generateShareCard() {
 
   // Title
   ctx.fillStyle = '#81C784';
-  ctx.font = 'bold 44px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
+  ctx.font = 'bold 88px -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('中午吃什么', W / 2, 205);
+  ctx.fillText('中午吃什么', W / 2, 410);
 
   // Emoji row
-  ctx.font = '50px sans-serif';
-  ctx.fillText('🍱  🍜  🍔  🍕  🍣  🥗', W / 2, 285);
+  ctx.font = '100px sans-serif';
+  ctx.fillText('🍱  🍜  🍔  🍕  🍣  🥗', W / 2, 570);
 
   // Subtitle
   ctx.fillStyle = '#999999';
-  ctx.font = '22px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('随机决定午餐的治愈小工具', W / 2, 345);
+  ctx.font = '44px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('随机决定午餐的治愈小工具', W / 2, 690);
 
   // Dashed divider
   ctx.strokeStyle = '#A5D6A7';
-  ctx.lineWidth = 1.5;
-  ctx.setLineDash([8, 6]);
+  ctx.lineWidth = 3;
+  ctx.setLineDash([16, 12]);
   ctx.beginPath();
-  ctx.moveTo(95, 385);
-  ctx.lineTo(W - 95, 385);
+  ctx.moveTo(190, 770);
+  ctx.lineTo(W - 190, 770);
   ctx.stroke();
   ctx.setLineDash([]);
 
-  // Feature list with emoji bullets
+  // Feature list
   ctx.fillStyle = '#777777';
-  ctx.font = '20px -apple-system, "PingFang SC", sans-serif';
+  ctx.font = '40px -apple-system, "PingFang SC", sans-serif';
   const features = [
     { icon: '🎲', text: '一键随机 · 告别选择困难' },
     { icon: '📝', text: '自由编辑 · 定制专属菜单' },
     { icon: '🎰', text: '老虎机动画 · 紧张又刺激' },
   ];
   features.forEach((f, i) => {
-    ctx.fillText(`${f.icon}  ${f.text}`, W / 2, 440 + i * 48);
+    ctx.fillText(`${f.icon}  ${f.text}`, W / 2, 880 + i * 96);
   });
 
   // QR code
-  const qrSize = 140;
+  const qrSize = 280;
   const qrX = (W - qrSize) / 2;
-  const qrY = H - 200;
+  const qrY = H - 400;
   ctx.fillStyle = '#FFFFFF';
-  roundRect(ctx, qrX - 16, qrY - 16, qrSize + 32, qrSize + 32, 20);
+  roundRect(ctx, qrX - 32, qrY - 32, qrSize + 64, qrSize + 64, 40);
   ctx.fill();
   ctx.drawImage(shareQrImage, qrX, qrY, qrSize, qrSize);
 
   // Bottom hint
   ctx.fillStyle = '#AAAAAA';
-  ctx.font = '14px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('扫码或长按识别 · 和朋友一起玩', W / 2, H - 24);
+  ctx.font = '28px -apple-system, "PingFang SC", sans-serif';
+  ctx.fillText('扫码或长按识别 · 和朋友一起玩', W / 2, H - 48);
 
   return canvas.toDataURL('image/png');
 }
@@ -932,7 +932,7 @@ function generateShareCard() {
 // Preload QR code image so it's ready when user clicks share
 const shareQrImage = new Image();
 shareQrImage.crossOrigin = 'anonymous';
-shareQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://lunch-1t7.pages.dev/&margin=8';
+shareQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=https://lunch-1t7.pages.dev/&margin=8';
 
 function showShareCard() {
   // If QR hasn't loaded yet, wait for it
