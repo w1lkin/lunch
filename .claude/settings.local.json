@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git -C /Users/welkin/Code/claude/lunch add index.html)",
+      "Bash(git -C /Users/welkin/Code/claude/lunch commit -m \"fix: 代码质量修复 — XSS 防护、编辑面板反馈、粒子清理、死代码移除\")"
+    ]
+  }
+}

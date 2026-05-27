@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>生成分享卡片</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", sans-serif; text-align: center; padding: 40px; }
+  canvas { border: 1px solid #eee; border-radius: 8px; max-width: 90vw; }
+  button { margin-top: 16px; padding: 12px 32px; font-size: 16px; background: #81C784; color: white; border: none; border-radius: 12px; cursor: pointer; }
+  p { color: #666; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h2>分享卡片预览</h2>
+<canvas id="c"></canvas>
+<p>点击下载 → 上传到托管平台根目录，命名为 <code>share-card.png</code></p>
+<button onclick="download()">下载 PNG</button>
+<script>
+const W = 600, H = 800;
+const canvas = document.getElementById('c');
+canvas.width = W;
+canvas.height = H;
+const ctx = canvas.getContext('2d');
+
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();}
+
+// BG
+const g = ctx.createLinearGradient(0,0,0,H);
+g.addColorStop(0,'#E8F5E9'); g.addColorStop(0.4,'#FFF9C4'); g.addColorStop(1,'#FFFDE7');
+ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+// Decos
+ctx.globalAlpha=0.12;
+[{x:80,y:180,r:100,c:'#81C784'},{x:480,y:140,r:70,c:'#A5D6A7'},{x:520,y:560,r:130,c:'#FFE082'},{x:100,y:620,r:60,c:'#81C784'}].forEach(d=>{ctx.fillStyle=d.c;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill();});
+ctx.globalAlpha=1;
+
+// White card
+ctx.fillStyle='#FFF';ctx.shadowColor='rgba(0,0,0,.08)';ctx.shadowBlur=40;ctx.shadowOffsetY=6;rr(ctx,45,120,W-90,H-300,28);ctx.fill();
+ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+
+// Title
+ctx.fillStyle='#81C784';ctx.font='bold 44px -apple-system,"PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='center';
+ctx.fillText('中午吃什么',W/2,205);
+ctx.font='50px sans-serif';ctx.fillText('🍱  🍜  🍔  🍕  🍣  🥗',W/2,285);
+ctx.fillStyle='#999';ctx.font='22px -apple-system,"PingFang SC",sans-serif';ctx.fillText('随机决定午餐的治愈小工具',W/2,345);
+
+// Divider
+ctx.strokeStyle='#A5D6A7';ctx.lineWidth=1.5;ctx.setLineDash([8,6]);
+ctx.beginPath();ctx.moveTo(95,385);ctx.lineTo(W-95,385);ctx.stroke();ctx.setLineDash([]);
+
+// Features
+ctx.fillStyle='#777';ctx.font='20px -apple-system,"PingFang SC",sans-serif';
+['🎲  一键随机 · 告别选择困难','📝  自由编辑 · 定制专属菜单','🎰  老虎机动画 · 紧张又刺激'].forEach((t,i)=>ctx.fillText(t,W/2,440+i*48));
+
+// Bottom bar
+ctx.fillStyle='#81C784';rr(ctx,45,H-160,W-90,100,22);ctx.fill();
+ctx.fillStyle='#FFF';ctx.font='bold 26px -apple-system,"PingFang SC",sans-serif';ctx.fillText('lunch-1t7.pages.dev',W/2,H-100);
+ctx.fillStyle='#AAA';ctx.font='14px -apple-system,"PingFang SC",sans-serif';ctx.fillText('长按识别二维码 · 和朋友一起玩',W/2,H-18);
+
+function download() {
+  const a = document.createElement('a');
+  a.download = 'share-card.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+</script>
+</body>
+</html>
