@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__TITLE__ · 分享卡片</title>
+<style>
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    text-align: center; padding: 40px 16px;
+    background: #f5f5f5;
+  }
+  canvas { border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.12); max-width: 90vw; }
+  button {
+    margin-top: 20px; padding: 14px 40px; font-size: 17px;
+    background: #81C784; color: white; border: none; border-radius: 14px;
+    cursor: pointer; font-weight: 600;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  p { color: #888; margin-top: 12px; font-size: 14px; }
+</style>
+</head>
+<body>
+<h2>__TITLE__ 分享卡片</h2>
+<canvas id="c"></canvas>
+<p>点击下载 PNG，上传到托管平台作为 og:image</p>
+<button id="dl-btn" onclick="downloadPNG()" disabled>加载中…</button>
+<script>
+// === CONFIGURATION - Fill in before opening ===
+const CONFIG = {
+  url: "__URL__",
+  title: "__TITLE__",
+  subtitle: "__SUBTITLE__",
+  features: __FEATURES__,
+  primaryColor: "#81C784",
+  primaryLight: "#A5D6A7",
+};
+
+const W = 1200, H = 1600;
+const canvas = document.getElementById("c");
+canvas.width = W; canvas.height = H;
+const ctx = canvas.getContext("2d");
+
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function draw(qrImg) {
+  const c = CONFIG;
+
+  // Background gradient
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#E8F5E9"); g.addColorStop(0.4, "#FFF9C4"); g.addColorStop(1, "#FFFDE7");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  // Decorative circles
+  ctx.globalAlpha = 0.12;
+  [
+    { x: 160, y: 360, r: 200, f: c.primaryColor },
+    { x: 960, y: 280, r: 140, f: c.primaryLight },
+    { x: 1040, y: 1120, r: 260, f: "#FFE082" },
+    { x: 200, y: 1240, r: 120, f: c.primaryColor },
+    { x: 600, y: 200, r: 90, f: c.primaryLight },
+  ].forEach(d => { ctx.fillStyle = d.f; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill(); });
+  ctx.globalAlpha = 1;
+
+  // White content card
+  ctx.fillStyle = "#FFF";
+  ctx.shadowColor = "rgba(0,0,0,0.08)"; ctx.shadowBlur = 80; ctx.shadowOffsetY = 12;
+  rr(ctx, 90, 240, W - 180, H - 600, 56); ctx.fill();
+  ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+  // Title
+  ctx.fillStyle = c.primaryColor;
+  ctx.font = "bold 88px -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(c.title, W / 2, 410);
+
+  // Emoji row
+  ctx.font = "90px sans-serif";
+  ctx.fillText("🍱  🍜  🍔  🍕  🍣  🥗", W / 2, 560);
+
+  // Subtitle
+  ctx.fillStyle = "#999";
+  ctx.font = "44px -apple-system, 'PingFang SC', sans-serif";
+  ctx.fillText(c.subtitle, W / 2, 680);
+
+  // Dashed divider
+  ctx.strokeStyle = c.primaryLight; ctx.lineWidth = 3;
+  ctx.setLineDash([16, 12]);
+  ctx.beginPath(); ctx.moveTo(190, 760); ctx.lineTo(W - 190, 760); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Feature list
+  ctx.fillStyle = "#777";
+  ctx.font = "40px -apple-system, 'PingFang SC', sans-serif";
+  c.features.forEach((f, i) => ctx.fillText(f, W / 2, 860 + i * 96));
+
+  // QR code
+  const qs = 280, qx = (W - qs) / 2, qy = H - 400;
+  ctx.fillStyle = "#FFF";
+  rr(ctx, qx - 32, qy - 32, qs + 64, qs + 64, 40); ctx.fill();
+  ctx.drawImage(qrImg, qx, qy, qs, qs);
+
+  // Bottom hint
+  ctx.fillStyle = "#AAA";
+  ctx.font = "28px -apple-system, 'PingFang SC', sans-serif";
+  ctx.fillText("扫码或长按识别 · 和朋友一起玩", W / 2, H - 48);
+
+  document.getElementById("dl-btn").disabled = false;
+  document.getElementById("dl-btn").textContent = "下载 PNG";
+}
+
+const qr = new Image();
+qr.crossOrigin = "anonymous";
+qr.onload = () => draw(qr);
+qr.onerror = () => {
+  // Fallback: draw without QR if API fails
+  document.getElementById("dl-btn").disabled = false;
+  document.getElementById("dl-btn").textContent = "下载 PNG (无二维码)";
+  draw(null);
+};
+qr.src = "https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=" + encodeURIComponent(CONFIG.url) + "&margin=8";
+
+function downloadPNG() {
+  const a = document.createElement("a");
+  a.download = "share-card.png";
+  a.href = canvas.toDataURL("image/png");
+  a.click();
+}
+</script>
+</body>
+</html>
