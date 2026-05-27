@@ -912,25 +912,39 @@ function generateShareCard() {
     ctx.fillText(`${f.icon}  ${f.text}`, W / 2, 440 + i * 48);
   });
 
-  // Bottom section background
-  ctx.fillStyle = '#81C784';
-  roundRect(ctx, 45, H - 160, W - 90, 100, 22);
-  ctx.fill();
-
-  // URL text
+  // QR code
+  const qrSize = 140;
+  const qrX = (W - qrSize) / 2;
+  const qrY = H - 200;
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 26px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('lunch-1t7.pages.dev', W / 2, H - 100);
+  roundRect(ctx, qrX - 16, qrY - 16, qrSize + 32, qrSize + 32, 20);
+  ctx.fill();
+  ctx.drawImage(shareQrImage, qrX, qrY, qrSize, qrSize);
 
   // Bottom hint
   ctx.fillStyle = '#AAAAAA';
   ctx.font = '14px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText('长按识别二维码 · 和朋友一起玩', W / 2, H - 18);
+  ctx.fillText('扫码或长按识别 · 和朋友一起玩', W / 2, H - 24);
 
   return canvas.toDataURL('image/png');
 }
 
+// Preload QR code image so it's ready when user clicks share
+const shareQrImage = new Image();
+shareQrImage.crossOrigin = 'anonymous';
+shareQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://lunch-1t7.pages.dev/&margin=8';
+
 function showShareCard() {
+  // If QR hasn't loaded yet, wait for it
+  if (!shareQrImage.complete) {
+    shareQrImage.onload = () => {
+      const dataUrl = generateShareCard();
+      shareCardImg.src = dataUrl;
+      shareOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+    return;
+  }
   const dataUrl = generateShareCard();
   shareCardImg.src = dataUrl;
   shareOverlay.classList.add('active');
