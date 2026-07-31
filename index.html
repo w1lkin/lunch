@@ -6,8 +6,10 @@
 <meta property="og:title" content="中午吃什么">
 <meta property="og:description" content="随机决定午餐的治愈小工具">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://lunch-1t7.pages.dev/share-card.png">
+<meta property="og:image" content="https://lunch.w1lkin.site/share-card.png">
 <title>中午吃什么</title>
+<meta name="api-base" content="https://api.w1lkin.site">
+<script src="https://api.w1lkin.site/sdk.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -394,6 +396,7 @@ body {
 </style>
 </head>
 <body>
+<div id="gp-bar" style="position:fixed;top:0;left:0;right:0;z-index:50;padding:6px 12px;background:rgba(20,24,40,.85)"></div>
 
 <div class="container">
 
@@ -502,16 +505,16 @@ const SUB_TITLES = [
   '每天的灵魂拷问时间',
 ];
 
-function loadOptions() {
+async function loadOptions() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    const remote = await GamePlatform.getKV(STORAGE_KEY);
+    if (remote) return remote;
   } catch (e) { /* ignore */ }
   return [...DEFAULTS];
 }
 
 function saveOptions(options) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(options));
+  try { GamePlatform.setKV(STORAGE_KEY, options); } catch (e) {}
 }
 
 function randomPick(arr) {
@@ -525,7 +528,7 @@ function escapeHtml(str) {
 }
 
 // === State ===
-let options = loadOptions();
+let options = [...DEFAULTS];
 let isRolling = false;
 
 const SLOT_REPEATS = 8;
@@ -932,7 +935,7 @@ function generateShareCard() {
 // Preload QR code image so it's ready when user clicks share
 const shareQrImage = new Image();
 shareQrImage.crossOrigin = 'anonymous';
-shareQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=https://lunch-1t7.pages.dev/&margin=8';
+shareQrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=https://lunch.w1lkin.site/&margin=8';
 
 function showShareCard() {
   // If QR hasn't loaded yet, wait for it
@@ -963,7 +966,14 @@ shareOverlay.addEventListener('click', (e) => {
   if (e.target === shareOverlay) hideShareCard();
 });
 
-// === Init ===
+// === Init（硬登录门）===
+GamePlatform.init();
+GamePlatform.mountGate({ gameId: 'lunch' }).then(async () => {
+  GamePlatform.mountBar(document.getElementById('gp-bar'), { gameId: 'lunch' });
+  // 登录后从云端恢复选项
+  const cloud = await loadOptions();
+  if (cloud && cloud.length) { options = cloud; renderTags(); buildSlotStrips(); }
+});
 showMain();
 </script>
 
