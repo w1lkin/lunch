@@ -396,7 +396,6 @@ body {
 </style>
 </head>
 <body>
-<div id="gp-bar" style="position:fixed;top:0;left:0;right:0;z-index:50;padding:6px 12px;background:rgba(20,24,40,.85)"></div>
 
 <div class="container">
 
@@ -969,7 +968,6 @@ shareOverlay.addEventListener('click', (e) => {
 // === Init（硬登录门）===
 GamePlatform.init();
 GamePlatform.mountGate({ gameId: 'lunch' }).then(async () => {
-  GamePlatform.mountBar(document.getElementById('gp-bar'), { gameId: 'lunch' });
   // 登录后从云端恢复选项
   const cloud = await loadOptions();
   if (cloud && cloud.length) { options = cloud; renderTags(); buildSlotStrips(); }
