@@ -971,8 +971,8 @@ GamePlatform.mountGate({ gameId: 'lunch' }).then(async () => {
   // 登录后从云端恢复选项
   const cloud = await loadOptions();
   if (cloud && cloud.length) { options = cloud; renderTags(); buildSlotStrips(); }
+  showMain();
 });
-showMain();
 </script>
 
   <a href="https://game-list-arv.pages.dev" class="gp-home-btn" title="主页">🏠</a>
